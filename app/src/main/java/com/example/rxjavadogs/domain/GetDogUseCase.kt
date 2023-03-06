@@ -20,14 +20,12 @@ class GetDogUseCase {
     private val breedImageUseCase = GetBreedImageUseCase()
 
     operator fun invoke(callback: (Dog) -> Unit) {
-        breedImageUseCase { breedsToImageUrls ->
-            breedsToImageUrls.forEach { (breed, imageUrl) ->
-                val dog = Dog(
-                    breed = Breed(breed),
-                    imageUrl = ImageUrl(imageUrl),
-                )
-                callback(dog)
-            }
+        breedImageUseCase { (breed, imageUrl) ->
+            val dog = Dog(
+                breed = Breed(breed),
+                imageUrl = ImageUrl(imageUrl),
+            )
+            callback(dog)
         }
     }
 
