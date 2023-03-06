@@ -3,6 +3,7 @@ package com.example.rxjavadogs.domain
 import com.example.rxjavadogs.network.DogApi
 import com.example.rxjavadogs.network.Dogs
 import com.example.rxjavadogs.network.DogsClient
+import com.example.rxjavadogs.util.subscribe
 import io.reactivex.rxjava3.core.Observable
 import retrofit2.Call
 import retrofit2.Callback
@@ -14,7 +15,11 @@ TODO Replace the invoke() being used in this method with one that returns Observ
 */
 fun main() {
     GetBreedsUseCase().run {
-        invoke { it.breeds.keys.forEach(::println) }
+        invoke().subscribe(
+            onNext = { dogs ->
+                dogs.breeds.keys.forEach(::println)
+            },
+        )
     }
 }
 
@@ -34,10 +39,5 @@ class GetBreedsUseCase {
         })
     }
 
-    operator fun invoke(): Observable<List<String>> {
-        TODO(
-            "Refactor the code in GetBreedsUseCase#invoke(callback: (List<String>) -> Unit)" +
-                "so that it returns an Observable that emits the expected data.",
-        )
-    }
+    operator fun invoke(): Observable<Dogs> = client.getDogsListObservable()
 }

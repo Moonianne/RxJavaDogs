@@ -2,7 +2,10 @@ package com.example.rxjavadogs.domain
 
 import com.example.rxjavadogs.network.DogApi
 import com.example.rxjavadogs.network.DogImage
+import com.example.rxjavadogs.network.DogsClient
+import com.example.rxjavadogs.util.subscribe
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.kotlin.flatMapIterable
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -13,33 +16,29 @@ TODO Replace the invoke() being used in this method with one that returns Observ
 */
 fun main() {
     val breedImageUseCase = GetBreedImageUseCase()
-    breedImageUseCase {
-        it.forEach { (breed, imageUrl) ->
-            println("$breed : $imageUrl")
-        }
-    }
+    breedImageUseCase()
+        .subscribe(
+            onNext = { (breed, imageUrl) ->
+                println("$breed : $imageUrl")
+            }
+        )
 }
 class GetBreedImageUseCase {
+    private val client: DogsClient = DogApi.instance
     private val breedsUseCase = GetBreedsUseCase()
 
-    operator fun invoke(callback: (List<Pair<String, String>>) -> Unit) {
-        val breedsToImageUrls = mutableListOf<Pair<String, String>>()
-
+    operator fun invoke(callback: (Pair<String, String>) -> Unit) {
         breedsUseCase { dogs ->
             dogs.breeds.keys.forEach { breed ->
 
-                DogApi.instance.getDogImage(breed).enqueue(
+                client.getDogImage(breed).enqueue(
                     object : Callback<DogImage> {
                         override fun onResponse(
                             call: Call<DogImage>,
                             response: Response<DogImage>,
                         ) {
                             response.body()?.let { imageResult ->
-                                breedsToImageUrls.add(breed to imageResult.url)
-                            }
-
-                            if (breedsToImageUrls.size == dogs.breeds.keys.size) {
-                                callback(breedsToImageUrls)
+                                callback(breed to imageResult.url)
                             }
                         }
 
@@ -52,10 +51,13 @@ class GetBreedImageUseCase {
         }
     }
 
-    operator fun invoke(): Observable<List<Pair<String, String>>> {
-        TODO(
-            "Refactor the code in GetBreedImageUseCase#invoke(callback: (List<Pair<String, String>>) -> Unit)" +
-                "so that it returns an Observable that emits the expected data.",
-        )
+    operator fun invoke(): Observable<Pair<String, String>> {
+        return breedsUseCase()
+            .map { it.breeds.keys.toList() }
+            .flatMapIterable()
+            .flatMap { breed ->
+                client.getDogImageObservable(breed)
+                    .map { dogImage -> breed to dogImage.url }
+            }
     }
 }

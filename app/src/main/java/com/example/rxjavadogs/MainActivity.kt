@@ -21,18 +21,31 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.rxjavadogs.domain.GetDogItemsUseCase
 import com.example.rxjavadogs.ui.theme.RxJavaDogsTheme
 import com.example.rxjavadogs.view.Dog
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.Disposable
 
 class MainActivity : ComponentActivity() {
 
     private val itemsUseCase = GetDogItemsUseCase()
 
+    private lateinit var disposable: Disposable
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        loadDogs(::setContent)
+
+        disposable = itemsUseCase()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { dogItems ->
+                setContent(dogItems)
+            }
     }
 
-    private fun loadDogs(callback: (List<Dog>) -> Unit) {
-        itemsUseCase(callback = callback)
+    override fun onDestroy() {
+        super.onDestroy()
+
+        if (!disposable.isDisposed) {
+            disposable.dispose()
+        }
     }
 
     private fun setContent(dogs: List<Dog>) {
