@@ -1,8 +1,8 @@
 package com.example.rxjavadogs.domain
 
+import com.example.rxjavadogs.network.BreedImage
+import com.example.rxjavadogs.network.Breeds
 import com.example.rxjavadogs.network.DogApi
-import com.example.rxjavadogs.network.DogImage
-import com.example.rxjavadogs.network.Dogs
 import com.example.rxjavadogs.network.DogsClient
 import com.example.rxjavadogs.view.Breed
 import com.example.rxjavadogs.view.Dog
@@ -15,17 +15,17 @@ class GetDogItemsUseCase {
     private val dogClient: DogsClient = DogApi.instance
     operator fun invoke(callback: (List<Dog>) -> Unit) {
         val dogs = mutableListOf<Dog>()
-        dogClient.getDogList().enqueue(object : Callback<Dogs> {
-            override fun onResponse(call: Call<Dogs>, response: Response<Dogs>) {
+        dogClient.getDogList().enqueue(object : Callback<Breeds> {
+            override fun onResponse(call: Call<Breeds>, response: Response<Breeds>) {
                 response.body()?.let { breedResponse ->
                     val breeds = breedResponse.breeds.keys
                     breeds.forEach { breed ->
 
                         dogClient.getDogImage(breed).enqueue(
-                            object : Callback<DogImage> {
+                            object : Callback<BreedImage> {
                                 override fun onResponse(
-                                    call: Call<DogImage>,
-                                    response: Response<DogImage>,
+                                    call: Call<BreedImage>,
+                                    response: Response<BreedImage>,
                                 ) {
                                     response.body()?.let { imageResult ->
                                         val dog = Dog(
@@ -40,7 +40,7 @@ class GetDogItemsUseCase {
                                     }
                                 }
 
-                                override fun onFailure(call: Call<DogImage>, t: Throwable) {
+                                override fun onFailure(call: Call<BreedImage>, t: Throwable) {
                                     throw t
                                 }
                             },
@@ -49,7 +49,7 @@ class GetDogItemsUseCase {
                 }
             }
 
-            override fun onFailure(call: Call<Dogs>, t: Throwable) {
+            override fun onFailure(call: Call<Breeds>, t: Throwable) {
                 throw t
             }
         })

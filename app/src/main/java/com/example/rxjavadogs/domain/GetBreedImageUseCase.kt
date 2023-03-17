@@ -1,7 +1,7 @@
 package com.example.rxjavadogs.domain
 
+import com.example.rxjavadogs.network.BreedImage
 import com.example.rxjavadogs.network.DogApi
-import com.example.rxjavadogs.network.DogImage
 import com.example.rxjavadogs.network.DogsClient
 import io.reactivex.rxjava3.core.Observable
 import retrofit2.Call
@@ -27,17 +27,17 @@ class GetBreedImageUseCase {
             dogs.breeds.keys.forEach { breed ->
 
                 client.getDogImage(breed).enqueue(
-                    object : Callback<DogImage> {
+                    object : Callback<BreedImage> {
                         override fun onResponse(
-                            call: Call<DogImage>,
-                            response: Response<DogImage>,
+                            call: Call<BreedImage>,
+                            response: Response<BreedImage>,
                         ) {
                             response.body()?.let { imageResult ->
                                 callback(breed to imageResult.url)
                             }
                         }
 
-                        override fun onFailure(call: Call<DogImage>, t: Throwable) {
+                        override fun onFailure(call: Call<BreedImage>, t: Throwable) {
                             throw t
                         }
                     },
