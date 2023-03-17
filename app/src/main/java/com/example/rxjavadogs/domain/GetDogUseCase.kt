@@ -12,12 +12,11 @@ TODO Replace the invoke() being used in this method with one that returns Observ
 */
 fun main() {
     val dogUseCase = GetDogUseCase()
-    dogUseCase()
-        .subscribe(
-            onNext = { dog ->
-                println(dog)
-            },
-        )
+    dogUseCase().subscribe(
+        onNext = { dog ->
+            println(dog)
+        },
+    )
 }
 
 class GetDogUseCase {

@@ -7,14 +7,14 @@ import retrofit2.http.Path
 
 interface DogsClient {
     @GET("breeds/list/all")
-    fun getDogList(): Call<Dogs>
+    fun getDogList(): Call<Breeds>
 
     @GET("breeds/list/all")
-    fun getDogsListObservable(): Observable<Dogs>
+    fun getDogsListObservable(): Observable<Breeds>
 
     @GET("breed/{breed}/images/random")
-    fun getDogImage(@Path("breed") breed: String): Call<DogImage>
+    fun getDogImage(@Path("breed") breed: String): Call<BreedImage>
 
     @GET("breed/{breed}/images/random")
-    fun getDogImageObservable(@Path("breed") breed: String): Observable<DogImage>
+    fun getDogImageObservable(@Path("breed") breed: String): Observable<BreedImage>
 }
